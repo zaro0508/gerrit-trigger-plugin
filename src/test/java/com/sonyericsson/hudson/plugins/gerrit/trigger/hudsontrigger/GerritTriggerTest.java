@@ -27,6 +27,7 @@ import com.sonyericsson.hudson.plugins.gerrit.trigger.GerritServer;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.PluginImpl;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.config.IGerritHudsonTriggerConfig;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.config.ReplicationConfig;
+import com.sonyericsson.hudson.plugins.gerrit.trigger.config.SilentLevel;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.dependency.DependencyQueueTaskDispatcher;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.events.ManualPatchsetCreated;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.gerritnotifier.ToGerritRunListener;
@@ -299,7 +300,7 @@ public class GerritTriggerTest {
         boolean silentStartMode = false;
         GerritTrigger trigger = new GerritTrigger(null, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 true, silentStartMode, true, false, false, "", "", "", "", "", "", "", null, null, null,
-                null, false,  "", null);
+                null, false,  "", null, null);
         trigger = spy(trigger);
         Object triggerOnEvents = Whitebox.getInternalState(trigger, "triggerOnEvents");
 
@@ -1632,7 +1633,7 @@ public class GerritTriggerTest {
         ReplicationConfig replicationConfigMock = setupReplicationConfigMock();
         GerritTrigger gerritTrigger = new GerritTrigger(null, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, false, true,
                 false, false, "", "", "", "", "", "", "", null, PluginImpl.DEFAULT_SERVER_NAME, "slaveUUID", null,
-                false, "", null);
+                false, "", null, null);
 
         when(replicationConfigMock.isEnableReplication()).thenReturn(true);
         when(replicationConfigMock.isEnableSlaveSelectionInJobs()).thenReturn(true);
@@ -1653,7 +1654,7 @@ public class GerritTriggerTest {
         ReplicationConfig replicationConfigMock = setupReplicationConfigMock();
         GerritTrigger gerritTrigger = new GerritTrigger(null, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, false, true,
                 false, false, "", "", "", "", "", "", "", null, PluginImpl.DEFAULT_SERVER_NAME, "slaveUUID", null,
-                false, "", null);
+                false, "", null, null);
 
         // Replication is configured at job level but slave and default no longer exist.
         when(replicationConfigMock.isEnableReplication()).thenReturn(true);
