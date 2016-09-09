@@ -160,7 +160,7 @@ public final class ToGerritRunListener extends RunListener<Run> {
                   }
 
                   updateTriggerContexts(r);
-                  allBuildsCompleted(event, cause, listener);
+                  allBuildsCompleted(r, event, cause, listener);
                 }
             }
         }
@@ -174,14 +174,14 @@ public final class ToGerritRunListener extends RunListener<Run> {
      * @param cause   the Gerrit Cause which triggered the build initially.
      * @param listener   the Jenkins listener.
      */
-    public synchronized void allBuildsCompleted(GerritTriggeredEvent event, GerritCause cause, TaskListener listener) {
+    public synchronized void allBuildsCompleted(Run build, GerritTriggeredEvent event, GerritCause cause, TaskListener listener) {
         if (memory.isAllBuildsCompleted(event)) {
             try {
                 logger.info("All Builds are completed for cause: {}", cause);
                 if (event instanceof GerritEventLifecycle) {
                     ((GerritEventLifecycle)event).fireAllBuildsCompleted();
                 }
-                NotificationFactory.getInstance().queueBuildCompleted(memory.getMemoryImprint(event), listener);
+                NotificationFactory.getInstance().queueBuildCompleted(build, memory.getMemoryImprint(event), listener);
             } finally {
                 memory.forget(event);
             }

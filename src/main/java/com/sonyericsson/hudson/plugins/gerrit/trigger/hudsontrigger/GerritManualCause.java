@@ -47,17 +47,17 @@ public class GerritManualCause extends GerritUserCause {
      * @param event the event.
      * @param silentMode if silent mode.
      * @param context the trigger context.
-     * @see GerritCause#GerritCause(com.sonymobile.tools.gerrit.gerritevents.dto.events.GerritTriggeredEvent, boolean, TriggerContext)
+     * @see GerritCause#GerritCause(com.sonymobile.tools.gerrit.gerritevents.dto.events.PatchsetCreated, boolean, com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.data.TriggerContext)
      */
-    public GerritManualCause(ManualPatchsetCreated event, boolean silentMode, String silentLevel, TriggerContext context) {
-        super(event, silentMode, silentLevel, context, event.getUserName());
+    public GerritManualCause(ManualPatchsetCreated event, boolean silentMode, TriggerContext context) {
+        super(event, silentMode, context, event.getUserName());
     }
 
     /**
      * Standard constructor.
      * @param event the event.
      * @param silentMode if it is in silent mode.
-     * @see GerritCause#GerritCause(com.sonymobile.tools.gerrit.gerritevents.dto.events.GerritTriggeredEvent, boolean)
+     * @see GerritCause#GerritCause(com.sonymobile.tools.gerrit.gerritevents.dto.events.PatchsetCreated, boolean)
      */
     public GerritManualCause(ManualPatchsetCreated event, boolean silentMode) {
         super(event, silentMode, event.getUserName());

@@ -26,7 +26,6 @@ package com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger;
 
 import com.sonymobile.tools.gerrit.gerritevents.dto.events.GerritTriggeredEvent;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.Messages;
-import com.sonyericsson.hudson.plugins.gerrit.trigger.config.SilentLevel;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.data.TriggerContext;
 import hudson.model.Hudson;
 import jenkins.model.Jenkins;
@@ -54,9 +53,8 @@ public class GerritUserCause extends GerritCause {
      * @param silentMode if silentMode.
      * @param context the context.
      */
-    public GerritUserCause(GerritTriggeredEvent event, boolean silentMode,
-          String silentLevel, TriggerContext context) {
-        super(event, silentMode, silentLevel, context);
+    public GerritUserCause(GerritTriggeredEvent event, boolean silentMode, TriggerContext context) {
+        super(event, silentMode, context);
         this.authenticationName = Hudson.getAuthentication().getName();
     }
 
@@ -68,8 +66,8 @@ public class GerritUserCause extends GerritCause {
      * @param authenticationName the username.
      */
     public GerritUserCause(GerritTriggeredEvent event, boolean silentMode,
-          String silentLevel, TriggerContext context, String authenticationName) {
-        super(event, silentMode, silentLevel, context);
+            TriggerContext context, String authenticationName) {
+        super(event, silentMode, context);
         this.authenticationName = authenticationName;
     }
 
@@ -80,8 +78,8 @@ public class GerritUserCause extends GerritCause {
      * @param authenticationName the username.
      */
     public GerritUserCause(GerritTriggeredEvent event, boolean silentMode,
-          String silentLevel, String authenticationName) {
-        super(event, silentMode, silentLevel);
+            String authenticationName) {
+        super(event, silentMode);
         this.authenticationName = authenticationName;
     }
 
@@ -91,9 +89,8 @@ public class GerritUserCause extends GerritCause {
      * @param event the event.
      * @param silentMode if silentMode.
      */
-    public GerritUserCause(GerritTriggeredEvent event, boolean silentMode,
-          String silentLevel) {
-        super(event, silentMode, silentLevel);
+    public GerritUserCause(GerritTriggeredEvent event, boolean silentMode) {
+        super(event, silentMode);
         this.authenticationName = Jenkins.getAuthentication().getName();
     }
 

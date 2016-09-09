@@ -108,7 +108,6 @@ import com.sonymobile.tools.gerrit.gerritevents.watchdog.WatchTimeExceptionData;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.config.Config;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.config.IGerritHudsonTriggerConfig;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.config.ReplicationConfig;
-import com.sonyericsson.hudson.plugins.gerrit.trigger.config.SilentLevel;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.GerritConnectionListener;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.GerritTrigger;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.data.GerritSlave;
@@ -833,19 +832,6 @@ public class GerritServer implements Describable<GerritServer>, Action {
             }
             return items;
         }
-        /**
-         * Fill the dropdown for silent levels.
-         *
-         * @return the values.
-         */
-        public ListBoxModel doFillSilentLevelItems() {
-            Map<SilentLevel, String> levelTextsById = silentLevelTextsById();
-            ListBoxModel items = new ListBoxModel(levelTextsById.size());
-            for (Entry<SilentLevel, String> level : levelTextsById.entrySet()) {
-                items.add(new Option(level.getValue(), level.getKey().toString()));
-            }
-            return items;
-        }
     }
 
     /**
@@ -858,18 +844,6 @@ public class GerritServer implements Describable<GerritServer>, Action {
         Map<Notify, String> textsById = new LinkedHashMap<Notify, String>(Notify.values().length, 1);
         for (Notify level : Notify.values()) {
             textsById.put(level, holder.format("NotificationLevel_" + level));
-        }
-        return textsById;
-    }
-    /**
-     * Returns localized texts for each known silent value.
-     *
-     * @return a map with level id to level text.
-     */
-    public static Map<SilentLevel, String> silentLevelTextsById() {
-        Map<SilentLevel, String> textsById = new LinkedHashMap<SilentLevel, String>(SilentLevel.values().length, 1);
-        for (SilentLevel level : SilentLevel.values()) {
-              textsById.put(level, level.toString());
         }
         return textsById;
     }

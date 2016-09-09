@@ -651,7 +651,7 @@ public final class Setup {
      */
     public static ToGerritRunListener createFailureMessageRunListener(final AbstractBuild build,
             final PatchsetCreated event, final String filepath) {
-        GerritCause cause = new GerritCause(event, false, SilentLevel.ALL.toString());
+        GerritCause cause = new GerritCause(event, false);
         when(build.getCause(GerritCause.class)).thenReturn(cause);
         CauseAction causeAction = mock(CauseAction.class);
         when(causeAction.getCauses()).thenReturn(Collections.<Cause>singletonList(cause));

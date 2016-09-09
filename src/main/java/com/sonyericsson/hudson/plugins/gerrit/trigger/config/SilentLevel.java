@@ -23,6 +23,9 @@
  */
 package com.sonyericsson.hudson.plugins.gerrit.trigger.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Values for Silent Mode.
  */
@@ -43,4 +46,12 @@ public enum SilentLevel {
      */
     VOTES;
 
+
+    public static List<String> getLevels() {
+      List<String> levels = new ArrayList();
+      levels.add(ALL.toString());
+      levels.add(COMMENTS.toString());
+      levels.add(VOTES.toString());
+      return levels;
+    }
 }

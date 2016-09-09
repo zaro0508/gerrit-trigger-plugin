@@ -2148,11 +2148,17 @@ public class GerritTrigger extends Trigger<Job> {
          * @return the values.
          */
         public ListBoxModel doFillSilentLevelItems(@QueryParameter("serverName") final String serverName) {
-            Map<SilentLevel, String> levelTextsById = GerritServer.silentLevelTextsById();
-            ListBoxModel items = new ListBoxModel(levelTextsById.size() + 1);
-            items.add(getOptionForSilentLevelDefault(serverName, levelTextsById));
-            for (Entry<SilentLevel, String> level : levelTextsById.entrySet()) {
-                items.add(new Option(level.getValue(), level.getKey().toString()));
+//            Map<SilentLevel, String> levelTextsById = GerritServer.silentLevelTextsById();
+            Map<SilentLevel, String> levelTextsById = new HashMap();
+//            ListBoxModel items = new ListBoxModel(levelTextsById.size() + 1);
+            ListBoxModel items = new ListBoxModel(3);
+           // items.add(getOptionForSilentLevelDefault(serverName, levelTextsById));
+//            for (Entry<SilentLevel, String> level : levelTextsById.entrySet()) {
+//                items.add(new Option(level.getValue(), level.getKey().toString()));
+//            }
+
+            for (String level: SilentLevel.getLevels()) {
+              items.add(new Option(level.toLowerCase(), level));
             }
             return items;
         }
@@ -2190,38 +2196,38 @@ public class GerritTrigger extends Trigger<Job> {
             return new Option(Messages.NotificationLevel_DefaultValueFromServer(defaultText), "");
         }
 
-        /**
-         * Reads the default option for the silent level, usually from the server config.
-         *
-         * @param serverName the server name.
-         * @param levelTextsById a map with the localized level texts.
-         * @return the default option.
-         */
-        private static Option getOptionForSilentLevelDefault(
-                final String serverName, Map<SilentLevel, String> levelTextsById) {
-            if (ANY_SERVER.equals(serverName)) {
-                // We do not know which server is selected, so we cannot tell the
-                // currently active default value.  It might be the global default,
-                // but also a different value.
-                return new Option(Messages.SilentLevel_DefaultValue(), "");
-            } else if (serverName != null) {
-                GerritServer server = PluginImpl.getServer_(serverName);
-                if (server != null) {
-                    SilentLevel level = server.getConfig().getSilentLevel();
-                    if (level != null) {
-                        String levelText = levelTextsById.get(level);
-                        if (levelText == null) { // new/unknown value
-                            levelText = level.toString();
-                        }
-                        return new Option(Messages.SilentLevel_DefaultValueFromServer(levelText), "");
-                    }
-                }
-            }
-
-            // fall back to global default
-            String defaultText = levelTextsById.get(Config.DEFAULT_SILENT_LEVEL);
-            return new Option(Messages.SilentLevel_DefaultValueFromServer(defaultText), "");
-        }
+//        /**
+//         * Reads the default option for the silent level, usually from the server config.
+//         *
+//         * @param serverName the server name.
+//         * @param levelTextsById a map with the localized level texts.
+//         * @return the default option.
+//         */
+//        private static Option getOptionForSilentLevelDefault(
+//                final String serverName, Map<SilentLevel, String> levelTextsById) {
+//            if (ANY_SERVER.equals(serverName)) {
+//                // We do not know which server is selected, so we cannot tell the
+//                // currently active default value.  It might be the global default,
+//                // but also a different value.
+//                return new Option(Messages.SilentLevel_DefaultValue(), "");
+//            } else if (serverName != null) {
+//                GerritServer server = PluginImpl.getServer_(serverName);
+//                if (server != null) {
+//                    SilentLevel level = server.getConfig().getSilentLevel();
+//                    if (level != null) {
+//                        String levelText = levelTextsById.get(level);
+//                        if (levelText == null) { // new/unknown value
+//                            levelText = level.toString();
+//                        }
+//                        return new Option(Messages.SilentLevel_DefaultValueFromServer(levelText), "");
+//                    }
+//                }
+//            }
+//
+//            // fall back to global default
+//            String defaultText = levelTextsById.get(Config.DEFAULT_SILENT_LEVEL);
+//            return new Option(Messages.SilentLevel_DefaultValueFromServer(defaultText), "");
+//        }
 
         /**
          * Default Constructor.
