@@ -103,7 +103,7 @@ public final class EventListener implements GerritEventListener {
             if (t.isInteresting(triggeredEvent)) {
                 logger.trace("The event is interesting.");
                 notifyOnTriggered(t, triggeredEvent);
-                schedule(t, new GerritCause(triggeredEvent, t.isSilentMode()), triggeredEvent);
+                schedule(t, new GerritCause(triggeredEvent, t.isSilentMode(), t.getSilentLevel()), triggeredEvent);
             }
         }
     }
@@ -149,7 +149,7 @@ public final class EventListener implements GerritEventListener {
         if (t.isInteresting(event) && t.commentAddedMatch(event)) {
             logger.trace("The event is interesting.");
             notifyOnTriggered(t, event);
-            schedule(t, new GerritCause(event, t.isSilentMode()), event);
+            schedule(t, new GerritCause(event, t.isSilentMode(), t.getSilentLevel()), event);
         }
     }
 

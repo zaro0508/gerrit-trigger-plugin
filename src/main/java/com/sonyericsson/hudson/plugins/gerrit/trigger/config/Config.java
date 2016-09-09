@@ -144,6 +144,11 @@ public class Config implements IGerritHudsonTriggerConfig {
      */
     public static final Notify DEFAULT_NOTIFICATION_LEVEL = Notify.ALL;
 
+    /**
+     * Global default for silent level.
+     */
+    public static final SilentLevel DEFAULT_SILENT_LEVEL = SilentLevel.ALL;
+
     private String gerritHostName;
     private int gerritSshPort;
     private String gerritProxy;
@@ -192,6 +197,7 @@ public class Config implements IGerritHudsonTriggerConfig {
     private int watchdogTimeoutMinutes;
     private WatchTimeExceptionData watchTimeExceptionData;
     private Notify notificationLevel;
+    private SilentLevel silentLevel;
     private BuildCancellationPolicy buildCurrentPatchesOnly;
 
     /**
@@ -215,6 +221,7 @@ public class Config implements IGerritHudsonTriggerConfig {
         gerritUserName = config.getGerritUserName();
         gerritEMail = config.getGerritEMail();
         notificationLevel = config.getNotificationLevel();
+        silentLevel = config.getSilentLevel();
         gerritAuthKeyFile = new File(config.getGerritAuthKeyFile().getPath());
         gerritAuthKeyFilePassword = Secret.fromString(config.getGerritAuthKeyFilePassword());
         useRestApi = config.isUseRestApi();
@@ -270,6 +277,8 @@ public class Config implements IGerritHudsonTriggerConfig {
         gerritEMail = formData.optString("gerritEMail", "");
         notificationLevel = Notify.valueOf(formData.optString("notificationLevel",
                 Config.DEFAULT_NOTIFICATION_LEVEL.toString()));
+        silentLevel = SilentLevel.valueOf(formData.optString("silentLevel",
+            Config.DEFAULT_SILENT_LEVEL.toString()));
         String file = formData.optString("gerritAuthKeyFile", null);
         if (file != null) {
             gerritAuthKeyFile = new File(file);
@@ -723,6 +732,11 @@ public class Config implements IGerritHudsonTriggerConfig {
         return notificationLevel;
     }
 
+    @Override
+    public SilentLevel getSilentLevel() {
+        return silentLevel;
+    }
+
     /**
      * The e-mail address for the user in gerrit.
      * Comments added from this e-mail address will be ignored.
@@ -740,6 +754,15 @@ public class Config implements IGerritHudsonTriggerConfig {
      */
     public void setNotificationLevel(Notify notificationLevel) {
         this.notificationLevel = notificationLevel;
+    }
+
+    /**
+     * Sets the value for what to be silent about.
+     *
+     * @param silentLevel the silent level.
+     */
+    public void setSilentLevel(SilentLevel silentLevel) {
+        this.silentLevel = silentLevel;
     }
 
     @Override

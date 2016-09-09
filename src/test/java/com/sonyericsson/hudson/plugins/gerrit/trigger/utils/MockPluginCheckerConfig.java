@@ -3,6 +3,7 @@ package com.sonyericsson.hudson.plugins.gerrit.trigger.utils;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.VerdictCategory;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.config.IGerritHudsonTriggerConfig;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.config.ReplicationConfig;
+import com.sonyericsson.hudson.plugins.gerrit.trigger.config.SilentLevel;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.data.BuildCancellationPolicy;
 import com.sonymobile.tools.gerrit.gerritevents.dto.events.GerritTriggeredEvent;
 import com.sonymobile.tools.gerrit.gerritevents.dto.rest.Notify;
@@ -255,6 +256,11 @@ public class MockPluginCheckerConfig implements IGerritHudsonTriggerConfig {
 
     @Override
     public Notify getNotificationLevel() {
+        return null;
+    }
+
+    @Override
+    public SilentLevel getSilentLevel() {
         return null;
     }
 

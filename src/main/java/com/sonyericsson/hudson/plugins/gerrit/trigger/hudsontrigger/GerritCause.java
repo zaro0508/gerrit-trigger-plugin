@@ -33,6 +33,7 @@ import com.sonyericsson.hudson.plugins.gerrit.trigger.Messages;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.GerritServer;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.PluginImpl;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.config.IGerritHudsonTriggerConfig;
+import com.sonyericsson.hudson.plugins.gerrit.trigger.config.SilentLevel;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.data.TriggerContext;
 import hudson.triggers.SCMTrigger.SCMTriggerCause;
 
@@ -45,6 +46,7 @@ public class GerritCause extends SCMTriggerCause {
     private static final Logger logger = LoggerFactory.getLogger(GerritCause.class);
     private GerritTriggeredEvent tEvent;
     private boolean silentMode;
+    private String silentLevel;
     private TriggerContext context;
     private String url;
 
@@ -53,10 +55,12 @@ public class GerritCause extends SCMTriggerCause {
      * @param event the event that triggered the build.
      * @param silentMode Silent Mode on or off.
      */
-    public GerritCause(GerritTriggeredEvent event, boolean silentMode) {
+    public GerritCause(GerritTriggeredEvent event, boolean silentMode,
+          String silentLevel) {
         super("");
         this.tEvent = event;
         this.silentMode = silentMode;
+        this.silentLevel = silentLevel;
         this.context = new TriggerContext(event);
         this.url = getUrlFromEvent();
     }
@@ -67,10 +71,12 @@ public class GerritCause extends SCMTriggerCause {
      * @param silentMode Silent Mode on or off.
      * @param context The context with information about other builds triggered for the same event as this one.
      */
-    public GerritCause(GerritTriggeredEvent event, boolean silentMode, TriggerContext context) {
+    public GerritCause(GerritTriggeredEvent event, boolean silentMode,
+          String silentLevel, TriggerContext context) {
         super("");
         this.tEvent = event;
         this.silentMode = silentMode;
+        this.silentLevel = silentLevel;
         this.context = context;
         this.url = getUrlFromEvent();
     }
@@ -120,6 +126,25 @@ public class GerritCause extends SCMTriggerCause {
      */
     public void setSilentMode(boolean silentMode) {
         this.silentMode = silentMode;
+    }
+
+    /**
+     * Gets the indication if silent level when the build was triggered.
+     * Default is ALL.
+     * @return The SilentLevel.
+     * @see GerritTrigger#getSilentLevel()
+     */
+    public String getSilentLevel() {
+        return silentLevel;
+    }
+
+    /**
+     * Sets the SilentLevel when the build was triggered.
+     * @param silentLevel.
+     * @see GerritTrigger#setSilentLevel(SilentLevel)
+     */
+    public void setSilentLevel(String silentLevel) {
+        this.silentLevel = silentLevel;
     }
 
     /**
@@ -204,7 +229,8 @@ public class GerritCause extends SCMTriggerCause {
 
     @Override
     public String toString() {
-        return "GerritCause: " + tEvent + " silent: " + silentMode;
+        return "GerritCause: " + tEvent + " silent: " + silentMode
+            + " silent for: " + silentLevel;
     }
 
     //CS IGNORE InlineConditionals FOR NEXT 40 LINES. REASON: Auto generated code
@@ -224,6 +250,9 @@ public class GerritCause extends SCMTriggerCause {
         if (silentMode != that.silentMode) {
             return false;
         }
+        if (silentLevel != that.silentLevel) {
+          return false;
+        }
         if (!tEvent.equals(that.tEvent)) {
             return false;
         }
@@ -236,6 +265,9 @@ public class GerritCause extends SCMTriggerCause {
         int result = 1;
         if (tEvent != null) {
             result = tEvent.hashCode();
+        }
+        if (silentLevel != null) {
+            result = result + silentLevel.hashCode();
         }
         result = 31 * result + (silentMode ? 1 : 0);
         return result;

@@ -38,6 +38,7 @@ import com.sonymobile.tools.gerrit.gerritevents.dto.events.PatchsetCreated;
 import com.sonymobile.tools.gerrit.gerritevents.dto.events.RefReplicated;
 import com.sonymobile.tools.gerrit.gerritevents.dto.events.RefUpdated;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.VerdictCategory;
+import com.sonyericsson.hudson.plugins.gerrit.trigger.config.SilentLevel;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.PluginImpl;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.events.ManualPatchsetCreated;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.gerritnotifier.ToGerritRunListener;
@@ -619,7 +620,7 @@ public final class Setup {
 
         GerritTrigger trigger = new GerritTrigger(null, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 silentMode, silentStart, true, false, false, "", "", "", "", "", "", "", null,
-                PluginImpl.DEFAULT_SERVER_NAME, null, triggerOnEvents, false, "", null);
+                PluginImpl.DEFAULT_SERVER_NAME, null, triggerOnEvents, false, "", null, null);
 
         if (job != null) {
             trigger.start(job, true);
@@ -650,7 +651,7 @@ public final class Setup {
      */
     public static ToGerritRunListener createFailureMessageRunListener(final AbstractBuild build,
             final PatchsetCreated event, final String filepath) {
-        GerritCause cause = new GerritCause(event, false);
+        GerritCause cause = new GerritCause(event, false, SilentLevel.ALL.toString());
         when(build.getCause(GerritCause.class)).thenReturn(cause);
         CauseAction causeAction = mock(CauseAction.class);
         when(causeAction.getCauses()).thenReturn(Collections.<Cause>singletonList(cause));

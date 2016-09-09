@@ -27,6 +27,7 @@ package com.sonyericsson.hudson.plugins.gerrit.trigger.gerritnotifier;
 
 import com.sonyericsson.hudson.plugins.gerrit.trigger.config.Config;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.config.IGerritHudsonTriggerConfig;
+import com.sonyericsson.hudson.plugins.gerrit.trigger.config.SilentLevel;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.gerritnotifier.model.BuildMemory.MemoryImprint;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.gerritnotifier.model.BuildMemory.MemoryImprint.Entry;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.gerritnotifier.model.BuildsStartedStats;
@@ -492,6 +493,59 @@ public class ParameterExpander {
             return serverLevel;
         }
         return Config.DEFAULT_NOTIFICATION_LEVEL;
+    }
+
+    /**
+     * Returns the highest configured silent level.
+     *
+     * @param memoryImprint the memory
+     * @param onlyBuilt only count builds that completed (no NOT_BUILT builds)
+     * @return the highest configured silent level.
+     */
+    public SilentLevel getHighestSilentLevel(MemoryImprint memoryImprint, boolean onlyBuilt) {
+        SilentLevel highestLevel = SilentLevel.ALL;
+        for (Entry entry : memoryImprint.getEntries()) {
+            if (entry == null) {
+                continue;
+            }
+            Run build = entry.getBuild();
+            if (build == null) {
+                continue;
+            }
+            Result result = build.getResult();
+            if (onlyBuilt && result == Result.NOT_BUILT) {
+                continue;
+            }
+
+            GerritTrigger trigger = GerritTrigger.getTrigger(entry.getProject());
+            if (trigger == null || shouldSkip(trigger.getSkipVote(), result)) {
+                continue;
+            }
+
+            SilentLevel level = getSilentLevel(trigger);
+            if (level != null && level.compareTo(highestLevel) > 0) {
+                highestLevel = level;
+            }
+        }
+        return highestLevel;
+    }
+
+    /**
+     * Returns the silent level value for the given trigger.
+     *
+     * @param trigger the trigger.
+     * @return the level value.
+     */
+    public SilentLevel getSilentLevel(GerritTrigger trigger) {
+        String level = trigger.getSilentLevel();
+        if (level != null && level.length() > 0) {
+            return SilentLevel.valueOf(level);
+        }
+        SilentLevel serverLevel = config.getSilentLevel();
+        if (serverLevel != null) {
+            return serverLevel;
+        }
+        return Config.DEFAULT_SILENT_LEVEL;
     }
 
     /**

@@ -49,8 +49,8 @@ public class GerritManualCause extends GerritUserCause {
      * @param context the trigger context.
      * @see GerritCause#GerritCause(com.sonymobile.tools.gerrit.gerritevents.dto.events.GerritTriggeredEvent, boolean, TriggerContext)
      */
-    public GerritManualCause(ManualPatchsetCreated event, boolean silentMode, TriggerContext context) {
-        super(event, silentMode, context, event.getUserName());
+    public GerritManualCause(ManualPatchsetCreated event, boolean silentMode, String silentLevel, TriggerContext context) {
+        super(event, silentMode, silentLevel, context, event.getUserName());
     }
 
     /**

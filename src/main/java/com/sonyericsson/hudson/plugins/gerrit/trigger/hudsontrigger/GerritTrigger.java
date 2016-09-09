@@ -34,6 +34,7 @@ import com.sonyericsson.hudson.plugins.gerrit.trigger.VerdictCategory;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.config.Config;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.config.IGerritHudsonTriggerConfig;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.config.ReplicationConfig;
+import com.sonyericsson.hudson.plugins.gerrit.trigger.config.SilentLevel;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.dependency.DependencyQueueTaskDispatcher;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.events.ManualPatchsetCreated;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.gerritnotifier.ToGerritRunListener;
@@ -159,6 +160,7 @@ public class GerritTrigger extends Trigger<Job> {
     private Integer gerritBuildNotBuiltCodeReviewValue;
     private boolean silentMode;
     private String notificationLevel;
+    private String silentLevel;
     private boolean silentStartMode;
     private boolean escapeQuotes;
     private GerritTriggerParameters.ParameterMode nameAndEmailParameterMode;
@@ -206,6 +208,20 @@ public class GerritTrigger extends Trigger<Job> {
         } catch (NullPointerException ignored) { /*Could happen during testing*/ }
         if (this.notificationLevel == null) {
             this.notificationLevel = "";
+        }
+
+        try {
+          DescriptorImpl descriptor = (DescriptorImpl)getDescriptor();
+          if (descriptor != null) {
+              ListBoxModel options = descriptor.doFillSilentLevelItems(this.serverName);
+              if (!options.isEmpty()) {
+                  this.silentLevel = options.get(0).value;
+              }
+          }
+          //CS IGNORE EmptyBlock FOR NEXT 1 LINES. REASON: Handled one row below
+        } catch (NullPointerException ignored) { /*Could happen during testing*/ }
+        if (this.silentLevel == null) {
+            this.silentLevel = "";
         }
 
         this.commitMessageParameterMode = GerritTriggerParameters.ParameterMode.BASE64;
@@ -278,6 +294,7 @@ public class GerritTrigger extends Trigger<Job> {
      * @param dynamicTriggerConfiguration    Dynamic trigger configuration on or off
      * @param triggerConfigURL               Where to fetch the configuration file from
      * @param notificationLevel              Whom to notify.
+     * @param silentLevel                    Silent Model Level.
      */
     @Deprecated
     public GerritTrigger(List<GerritProject> gerritProjects, SkipVote skipVote, Integer gerritBuildStartedVerifiedValue,
@@ -290,7 +307,7 @@ public class GerritTrigger extends Trigger<Job> {
             String buildStartMessage, String buildSuccessfulMessage, String buildUnstableMessage,
             String buildFailureMessage, String buildNotBuiltMessage, String buildUnsuccessfulFilepath, String customUrl,
             String serverName, String gerritSlaveId, List<PluginGerritEvent> triggerOnEvents,
-            boolean dynamicTriggerConfiguration, String triggerConfigURL, String notificationLevel) {
+            boolean dynamicTriggerConfiguration, String triggerConfigURL, String notificationLevel, String silentLevel) {
         this.gerritProjects = gerritProjects;
         this.skipVote = skipVote;
         this.gerritBuildStartedVerifiedValue = gerritBuildStartedVerifiedValue;
@@ -334,6 +351,7 @@ public class GerritTrigger extends Trigger<Job> {
         this.gerritTriggerTimerTask = null;
         this.triggerInformationAction = new GerritTriggerInformationAction();
         this.notificationLevel = notificationLevel;
+        this.silentLevel = silentLevel;
     }
 
     /**
@@ -481,6 +499,12 @@ public class GerritTrigger extends Trigger<Job> {
                 notificationLevel = options.get(0).value;
             }
         }
+        if (this.silentLevel == null) {
+          ListBoxModel options = ((DescriptorImpl)getDescriptor()).doFillSilentLevelItems(this.serverName);
+          if (!options.isEmpty()) {
+              silentLevel = options.get(0).value;
+          }
+      }
     }
 
     /**
@@ -845,7 +869,7 @@ public class GerritTrigger extends Trigger<Job> {
                                 context.getEvent(),
                                 context.getOtherBuilds());
                     }
-                    final GerritUserCause cause = new GerritUserCause(context.getEvent(), silentMode);
+                    final GerritUserCause cause = new GerritUserCause(context.getEvent(), silentMode, silentLevel);
                     createListener().schedule(this, cause, context.getEvent(), context.getThisBuild().getProject());
                 }
             }
@@ -897,7 +921,7 @@ public class GerritTrigger extends Trigger<Job> {
                     listener.onRetriggered(project, event, null);
                 }
             }
-            GerritUserCause cause = new GerritUserCause(event, silentMode);
+            GerritUserCause cause = new GerritUserCause(event, silentMode, silentLevel);
             schedule(cause, event, project);
         }
     }
@@ -1450,6 +1474,15 @@ public class GerritTrigger extends Trigger<Job> {
     }
 
     /**
+     * Silent Mode level to use.
+     *
+     * @return the silent level value
+     */
+    public String getSilentLevel() {
+        return silentLevel;
+    }
+
+    /**
      * if escapeQuotes is on or off. When escapeQuotes is on this plugin will escape quotes in Gerrit event parameter
      * string Default is true
      *
@@ -1663,6 +1696,16 @@ public class GerritTrigger extends Trigger<Job> {
     @DataBoundSetter
     public void setNotificationLevel(String notificationLevel) {
         this.notificationLevel = notificationLevel;
+    }
+
+    /**
+     * Silent Mode level to use.
+     *
+     * @param silentLevel the silent level.
+     */
+    @DataBoundSetter
+    public void setSilentLevel(String silentLevel) {
+        this.silentLevel = silentLevel;
     }
 
     /**
@@ -2100,6 +2143,21 @@ public class GerritTrigger extends Trigger<Job> {
         }
 
         /**
+         * Fill the dropdown for silent levels.
+         * @param serverName the server name.
+         * @return the values.
+         */
+        public ListBoxModel doFillSilentLevelItems(@QueryParameter("serverName") final String serverName) {
+            Map<SilentLevel, String> levelTextsById = GerritServer.silentLevelTextsById();
+            ListBoxModel items = new ListBoxModel(levelTextsById.size() + 1);
+            items.add(getOptionForSilentLevelDefault(serverName, levelTextsById));
+            for (Entry<SilentLevel, String> level : levelTextsById.entrySet()) {
+                items.add(new Option(level.getValue(), level.getKey().toString()));
+            }
+            return items;
+        }
+
+        /**
          * Reads the default option for the notification level, usually from the server config.
          *
          * @param serverName the server name.
@@ -2130,6 +2188,39 @@ public class GerritTrigger extends Trigger<Job> {
             // fall back to global default
             String defaultText = levelTextsById.get(Config.DEFAULT_NOTIFICATION_LEVEL);
             return new Option(Messages.NotificationLevel_DefaultValueFromServer(defaultText), "");
+        }
+
+        /**
+         * Reads the default option for the silent level, usually from the server config.
+         *
+         * @param serverName the server name.
+         * @param levelTextsById a map with the localized level texts.
+         * @return the default option.
+         */
+        private static Option getOptionForSilentLevelDefault(
+                final String serverName, Map<SilentLevel, String> levelTextsById) {
+            if (ANY_SERVER.equals(serverName)) {
+                // We do not know which server is selected, so we cannot tell the
+                // currently active default value.  It might be the global default,
+                // but also a different value.
+                return new Option(Messages.SilentLevel_DefaultValue(), "");
+            } else if (serverName != null) {
+                GerritServer server = PluginImpl.getServer_(serverName);
+                if (server != null) {
+                    SilentLevel level = server.getConfig().getSilentLevel();
+                    if (level != null) {
+                        String levelText = levelTextsById.get(level);
+                        if (levelText == null) { // new/unknown value
+                            levelText = level.toString();
+                        }
+                        return new Option(Messages.SilentLevel_DefaultValueFromServer(levelText), "");
+                    }
+                }
+            }
+
+            // fall back to global default
+            String defaultText = levelTextsById.get(Config.DEFAULT_SILENT_LEVEL);
+            return new Option(Messages.SilentLevel_DefaultValueFromServer(defaultText), "");
         }
 
         /**

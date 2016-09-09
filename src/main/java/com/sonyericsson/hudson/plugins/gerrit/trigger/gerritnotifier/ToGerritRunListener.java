@@ -24,6 +24,7 @@
 package com.sonyericsson.hudson.plugins.gerrit.trigger.gerritnotifier;
 
 import com.sonymobile.tools.gerrit.gerritevents.dto.events.GerritTriggeredEvent;
+import com.sonyericsson.hudson.plugins.gerrit.trigger.config.SilentLevel;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.events.lifecycle.GerritEventLifecycle;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.gerritnotifier.model.BuildMemory;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.gerritnotifier.model.BuildsStartedStats;
@@ -129,31 +130,38 @@ public final class ToGerritRunListener extends RunListener<Run> {
             if (event instanceof GerritEventLifecycle) {
                 ((GerritEventLifecycle)event).fireBuildCompleted(r);
             }
-            if (!cause.isSilentMode()) {
-                memory.completed(event, r);
-
-                Result result = r.getResult();
-                if (result != null && result.isWorseThan(Result.SUCCESS)) {
-                    try {
-                        // Attempt to record the unsuccessful message, if applicable
-                        String failureMessage = this.obtainUnsuccessfulMessage(event, r, listener);
-                        logger.info("Obtained unsuccessful message: {}", failureMessage);
-                        if (failureMessage != null) {
-                            memory.setEntryUnsuccessfulMessage(event, r, failureMessage);
-                        }
-                    } catch (IOException e) {
-                        listener.error("[gerrit-trigger] Unable to read unsuccessful message from the workspace.");
-                        logger.warn("IOException while obtaining unsuccessful message for build: "
-                                + r.getDisplayName(), e);
-                    } catch (InterruptedException e) {
-                        listener.error("[gerrit-trigger] Unable to read unsuccessful message from the workspace.");
-                        logger.warn("InterruptedException while obtaining unsuccessful message for build: "
-                                + r.getDisplayName(), e);
-                    }
+            if (cause.isSilentMode()) {
+                SilentLevel silentLevel = SilentLevel.ALL;
+                String sLevel = trigger.getSilentLevel();
+                if (!sLevel.equals("")){
+                  silentLevel = SilentLevel.valueOf(sLevel);
                 }
+                if (silentLevel != SilentLevel.ALL && silentLevel == SilentLevel.COMMENTS) {
+                  memory.completed(event, r);
 
-                updateTriggerContexts(r);
-                allBuildsCompleted(event, cause, listener);
+                  Result result = r.getResult();
+                  if (result != null && result.isWorseThan(Result.SUCCESS)) {
+                      try {
+                          // Attempt to record the unsuccessful message, if applicable
+                          String failureMessage = this.obtainUnsuccessfulMessage(event, r, listener);
+                          logger.info("Obtained unsuccessful message: {}", failureMessage);
+                          if (failureMessage != null) {
+                              memory.setEntryUnsuccessfulMessage(event, r, failureMessage);
+                          }
+                      } catch (IOException e) {
+                          listener.error("[gerrit-trigger] Unable to read unsuccessful message from the workspace.");
+                          logger.warn("IOException while obtaining unsuccessful message for build: "
+                                  + r.getDisplayName(), e);
+                      } catch (InterruptedException e) {
+                          listener.error("[gerrit-trigger] Unable to read unsuccessful message from the workspace.");
+                          logger.warn("InterruptedException while obtaining unsuccessful message for build: "
+                                  + r.getDisplayName(), e);
+                      }
+                  }
+
+                  updateTriggerContexts(r);
+                  allBuildsCompleted(event, cause, listener);
+                }
             }
         }
     }
@@ -216,16 +224,19 @@ public final class ToGerritRunListener extends RunListener<Run> {
                 }
             }
             if (!cause.isSilentMode()) {
-                memory.started(cause.getEvent(), r);
-                updateTriggerContexts(r);
                 GerritTrigger trigger = GerritTrigger.getTrigger(r.getParent());
-                boolean silentStartMode = false;
-                if (trigger != null) {
-                    silentStartMode = trigger.isSilentStartMode();
-                }
-                if (!silentStartMode) {
-                    BuildsStartedStats stats = memory.getBuildsStartedStats(cause.getEvent());
-                    NotificationFactory.getInstance().queueBuildStarted(r, listener, cause.getEvent(), stats);
+                SilentLevel level = SilentLevel.valueOf(trigger.getSilentLevel());
+                if (level != SilentLevel.ALL && level != SilentLevel.COMMENTS) {
+                  memory.started(cause.getEvent(), r);
+                  updateTriggerContexts(r);
+                  boolean silentStartMode = false;
+                  if (trigger != null) {
+                      silentStartMode = trigger.isSilentStartMode();
+                  }
+                  if (!silentStartMode) {
+                      BuildsStartedStats stats = memory.getBuildsStartedStats(cause.getEvent());
+                      NotificationFactory.getInstance().queueBuildStarted(r, listener, cause.getEvent(), stats);
+                  }
                 }
             }
             logger.info("Gerrit build [{}] Started for cause: [{}].", r, cause);

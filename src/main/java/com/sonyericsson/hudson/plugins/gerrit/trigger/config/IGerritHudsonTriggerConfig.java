@@ -313,6 +313,13 @@ public interface IGerritHudsonTriggerConfig extends GerritConnectionConfig2 {
      Notify getNotificationLevel();
 
      /**
+      * Returns the silent level to use.
+      *
+      * @return the silent level value
+      */
+      SilentLevel getSilentLevel();
+
+     /**
       * The instance of {@link Secret} which has a password for the private key, or null if there is none.
       *
       * @return the instance of {@link Secret}.
