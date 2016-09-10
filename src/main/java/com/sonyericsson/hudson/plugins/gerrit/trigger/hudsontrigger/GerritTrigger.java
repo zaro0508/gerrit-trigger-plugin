@@ -1489,7 +1489,7 @@ public class GerritTrigger extends Trigger<Job> {
      * @return whether comments are kept silent
      */
     public boolean isSilentComments() {
-        return (silentLevel == SilentLevel.ALL || silentLevel == SilentLevel.COMMENTS);
+        return (silentMode && (silentLevel == SilentLevel.ALL || silentLevel == SilentLevel.COMMENTS));
     }
 
     /**
@@ -1498,7 +1498,7 @@ public class GerritTrigger extends Trigger<Job> {
      * @return whether votes are kept silent
      */
     public boolean isSilentVotes() {
-        return (silentLevel == SilentLevel.ALL || silentLevel == SilentLevel.VOTES);
+        return (silentMode && (silentLevel == SilentLevel.ALL || silentLevel == SilentLevel.VOTES));
     }
 
     /**
