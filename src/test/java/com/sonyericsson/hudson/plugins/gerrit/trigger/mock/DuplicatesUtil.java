@@ -24,7 +24,6 @@
 package com.sonyericsson.hudson.plugins.gerrit.trigger.mock;
 
 import com.sonyericsson.hudson.plugins.gerrit.trigger.PluginImpl;
-import com.sonyericsson.hudson.plugins.gerrit.trigger.config.SilentLevel;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.GerritTrigger;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.data.Branch;
 import com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.data.CompareType;
@@ -91,7 +90,7 @@ public abstract class DuplicatesUtil {
         p.addTrigger(new GerritTrigger(projects, null,
                 null, null, null, null, null, null, null, null, null, null,
                 false, false, true, false, false, null, null, null, null, null, null, null,
-                null, serverName, null, null, false, null, null, SilentLevel.ALL));
+                null, serverName, null, null, false, null, null, null));
         return rule.configRoundtrip(p);
     }
 
